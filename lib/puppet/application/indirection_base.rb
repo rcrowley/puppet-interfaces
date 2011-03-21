@@ -5,9 +5,24 @@ class Puppet::Application::IndirectionBase < Puppet::Application::InterfaceBase
     @terminus = arg
   end
 
+  option("--stdin") do |arg|
+    @stdin = true
+  end
+
   attr_accessor :terminus, :indirection
 
+  # Create an object from the serialization passed on standard input.
+  # The object is passed via the arguments list into the eventual
+  # Puppet::Indirector::Request.
+  def main
+    if @stdin
+      arguments << interface.indirection.model.convert_from(format, STDIN.read)
+    end
+    super
+  end
+
   def setup
+    @stdin ||= false
     super
 
     if interface.respond_to?(:indirection)
