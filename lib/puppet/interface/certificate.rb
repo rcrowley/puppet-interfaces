@@ -3,25 +3,15 @@ require 'puppet/ssl/host'
 
 Puppet::Interface::Indirector.interface(:certificate) do
 
-  action :generate do
+  action :clean do
     invoke do |name|
-      host = Puppet::SSL::Host.new(name)
-      host.generate_certificate_request
-      host.certificate_request.class.indirection.save(host.certificate_request)
+      Puppet::SSL::Host.indirection.destroy(Puppet::SSL::Host.new(name))
     end
   end
 
   action :list do
     invoke do
-      Puppet::SSL::Host.indirection.search("*", {
-        :for => :certificate_request,
-      }).map { |h| h.inspect }
-    end
-  end
-
-  action :sign do |name|
-    invoke do |name|
-      Puppet::SSL::Host.indirection.save(Puppet::SSL::Host.new(name))
+      Puppet::SSL::Host.indirection.search("*")
     end
   end
 
